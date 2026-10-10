@@ -183,9 +183,16 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
                 : `/ threshold ${(threshold_applied * 100).toFixed(1)}%`}
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
-            <Clock className="w-3.5 h-3.5 text-zinc-500" />
-            <span>Deterministic latency: {latency_ms.toFixed(2)}ms</span>
+          <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400 flex-wrap justify-start sm:justify-end">
+            {analysis.cached && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold tracking-wider border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.12)]">
+                ⚡ CACHED RESULT (0.1ms)
+              </span>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-zinc-500" />
+              <span>Deterministic latency: {latency_ms.toFixed(2)}ms</span>
+            </div>
           </div>
         </div>
       </div>

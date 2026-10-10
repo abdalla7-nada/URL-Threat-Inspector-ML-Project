@@ -33,6 +33,14 @@ const PRESET_TARGETS = [
 
 export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
   const [inputUrl, setInputUrl] = useState('');
+  const isSubmittingRef = React.useRef<boolean>(false);
+  const lastSubmitTimeRef = React.useRef<number>(0);
+
+  // Input Sanitization: Strip zero-width chars and trailing dots/whitespace
+  const sanitizeUrl = (raw: string): string => {
+    const stripped = raw.replace(/[\u200B-\u200D\uFEFF]/g, '');
+    return stripped.trim().replace(/\.+$/, '');
+  };
 
   const trimmed = inputUrl.trim();
   const isPlainWordsWithoutDomain =
@@ -40,16 +48,47 @@ export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trimmed || isLoading) {
+    const now = Date.now();
+
+    // Double-click & rapid debounce guard: reject if already loading, submitting, or < 500ms
+    if (isLoading || isSubmittingRef.current || now - lastSubmitTimeRef.current < 500) {
       return;
     }
-    onInspect(trimmed);
+
+    const sanitized = sanitizeUrl(inputUrl);
+    if (!sanitized) {
+      return;
+    }
+
+    lastSubmitTimeRef.current = now;
+    isSubmittingRef.current = true;
+
+    try {
+      onInspect(sanitized);
+    } finally {
+      setTimeout(() => {
+        isSubmittingRef.current = false;
+      }, 500);
+    }
   };
 
   const handleSelectPreset = (url: string) => {
-    setInputUrl(url);
-    if (!isLoading) {
-      onInspect(url);
+    const now = Date.now();
+    if (isLoading || isSubmittingRef.current || now - lastSubmitTimeRef.current < 500) {
+      return;
+    }
+
+    const sanitized = sanitizeUrl(url);
+    setInputUrl(sanitized);
+    lastSubmitTimeRef.current = now;
+    isSubmittingRef.current = true;
+
+    try {
+      onInspect(sanitized);
+    } finally {
+      setTimeout(() => {
+        isSubmittingRef.current = false;
+      }, 500);
     }
   };
 
@@ -91,7 +130,7 @@ export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
               {isLoading ? (
                 <>
                   <Activity className="w-4 h-4 animate-spin text-zinc-950" />
-                  <span>Analyzing...</span>
+                  <span>Scanning...</span>
                 </>
               ) : (
                 <>

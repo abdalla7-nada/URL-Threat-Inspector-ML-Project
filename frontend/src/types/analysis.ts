@@ -27,6 +27,7 @@ export interface URLAnalysisResponse {
   latency_ms: number;
   forensics: URLForensics;
   risk_summary?: string;
+  cached?: boolean;
 }
 
 export interface URLAnalysisRequest {

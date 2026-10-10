@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { analysisCache } from '@/lib/cache';
 
 const BACKEND_BASE_URL = (
   process.env.BACKEND_URL || 
@@ -70,8 +71,27 @@ async function parseResponseBody(response: Response): Promise<{ data: unknown; s
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const targetUrl = `${BACKEND_BASE_URL}/analyze`;
+    const rawUrl = body?.url;
 
+    // Normalize incoming URL for deterministic cache keying
+    const cacheKey = typeof rawUrl === 'string' ? rawUrl.trim().toLowerCase() : '';
+
+    // Cache hit short-circuit
+    if (cacheKey) {
+      const cachedData = analysisCache.get(cacheKey);
+      if (cachedData && typeof cachedData === 'object') {
+        return NextResponse.json(
+          {
+            ...(cachedData as Record<string, unknown>),
+            cached: true,
+            latency_ms: 0.1,
+          },
+          { status: 200 }
+        );
+      }
+    }
+
+    const targetUrl = `${BACKEND_BASE_URL}/analyze`;
     const response = await fetchWithRetry(targetUrl, {
       method: 'POST',
       headers: {
@@ -82,6 +102,12 @@ export async function POST(req: NextRequest) {
     });
 
     const { data, status } = await parseResponseBody(response);
+
+    // Save successful inspection in LRU cache
+    if (status === 200 && cacheKey && data && typeof data === 'object') {
+      analysisCache.set(cacheKey, data);
+    }
+
     return NextResponse.json(data, { status });
   } catch (err: unknown) {
     return NextResponse.json(
