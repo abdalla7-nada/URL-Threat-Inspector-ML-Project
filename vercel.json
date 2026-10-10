@@ -1,8 +1,21 @@
 {
+  "functions": {
+    "api/*.py": {
+      "includeFiles": "api/**"
+    }
+  },
   "rewrites": [
     {
+      "source": "/health",
+      "destination": "/api/health.py"
+    },
+    {
+      "source": "/analyze",
+      "destination": "/api/analyze.py"
+    },
+    {
       "source": "/api/py/:path*",
-      "destination": "/backend/main.py"
+      "destination": "/api/:path*.py"
     }
   ]
 }

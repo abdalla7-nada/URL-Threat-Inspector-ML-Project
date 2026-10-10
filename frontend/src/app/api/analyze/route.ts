@@ -1,34 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * Resolves the target backend URL based on environment context:
- * 1. BACKEND_URL environment variable if explicitly configured.
- * 2. In production (e.g. Vercel co-deployment): internal Python serverless route (/api/py/analyze).
- * 3. In local development: direct FastAPI instance at http://127.0.0.1:8000/analyze.
- */
-function resolveBackendEndpoint(req: NextRequest): string {
-  // 1. Explicit backend URL override (e.g. external container or microservice)
-  const envBackendUrl =
-    process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
-  if (envBackendUrl) {
-    const clean = envBackendUrl.replace(/\/+$/, '');
-    return clean.endsWith('/analyze') ? clean : `${clean}/analyze`;
-  }
-
-  // 2. Production Vercel monorepo / serverless deployment
-  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-    const origin = req.nextUrl.origin;
-    return `${origin}/api/py/analyze`;
-  }
-
-  // 3. Local development fallback
-  return 'http://127.0.0.1:8000/analyze';
-}
+const BACKEND_BASE_URL = (
+  process.env.BACKEND_URL || 
+  'https://url-threat-inspector-ml-project.vercel.app'
+).replace(/\/$/, '');
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const targetUrl = resolveBackendEndpoint(req);
+    const targetUrl = `${BACKEND_BASE_URL}/analyze`;
 
     const response = await fetch(targetUrl, {
       method: 'POST',
@@ -51,20 +31,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const envBackendUrl =
-      process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL;
-    let healthUrl = 'http://127.0.0.1:8000/health';
-
-    if (envBackendUrl) {
-      const clean = envBackendUrl.replace(/\/+$/, '');
-      healthUrl = `${clean}/health`;
-    } else if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-      healthUrl = `${req.nextUrl.origin}/api/py/health`;
-    }
-
-    const response = await fetch(healthUrl, {
+    const targetUrl = `${BACKEND_BASE_URL}/health`;
+    const response = await fetch(targetUrl, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });
@@ -73,9 +43,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(data, { status: response.status });
   } catch {
     return NextResponse.json(
-      { status: 'HEALTHY', mode: 'STANDALONE_FALLBACK' },
-      { status: 200 }
+      {
+        status: 'UNREACHABLE',
+        detail: 'Backend diagnostic health check unreachable.',
+      },
+      { status: 502 }
     );
   }
 }
-

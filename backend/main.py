@@ -50,7 +50,10 @@ def _resolve_model_path() -> str:
         MODEL_PATH,
         os.path.join(os.getcwd(), "url_project", "backend", "model", "phishing_model.joblib"),
         os.path.join(os.getcwd(), "backend", "model", "phishing_model.joblib"),
+        os.path.join(os.getcwd(), "api", "model", "phishing_model.joblib"),
         os.path.join(os.getcwd(), "model", "phishing_model.joblib"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "model", "phishing_model.joblib"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "api", "model", "phishing_model.joblib"),
     ]
     for path in candidates:
         norm = os.path.normpath(path)
@@ -437,6 +440,8 @@ def get_service_metadata() -> Dict[str, Any]:
     tags=["Diagnostics"],
     summary="Health check and engine state probe",
 )
+@app.get("/api/health", response_model=ServiceHealthResponse, include_in_schema=False)
+@app.get("/api/py/health", response_model=ServiceHealthResponse, include_in_schema=False)
 def get_health() -> ServiceHealthResponse:
     """Returns engine health, model calibration, and verification telemetry."""
     return ServiceHealthResponse(
@@ -460,6 +465,8 @@ def get_health() -> ServiceHealthResponse:
     tags=["Threat Inspection"],
     summary="Inspect a single URL for malicious phishing indicators",
 )
+@app.post("/api/analyze", response_model=URLAnalysisResponse, status_code=status.HTTP_200_OK, include_in_schema=False)
+@app.post("/api/py/analyze", response_model=URLAnalysisResponse, status_code=status.HTTP_200_OK, include_in_schema=False)
 def analyze_url(payload: URLAnalysisRequest) -> URLAnalysisResponse:
     """
     Performs deterministic threat inspection on the provided URL:
