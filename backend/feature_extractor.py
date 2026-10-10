@@ -56,6 +56,78 @@ def compute_shannon_entropy(text: str) -> float:
     return float(entropy)
 
 
+def canonicalize_ip_host(host_str: str) -> Optional[str]:
+    """
+    Normalizes standard IPv4, bracketed IPv6, and alternative IP representations
+    (dword integer, hex, octal, dotted-hex/octal) into standard dotted-decimal notation.
+    Returns None if the host string is not an IP address.
+    """
+    if not host_str:
+        return None
+    clean = host_str.strip().strip("[]")
+    candidate = clean
+    if ":" in clean and not clean.startswith("0x"):
+        if clean.count(":") == 1:
+            candidate = clean.split(":")[0]
+
+    # 1. Standard ipaddress parser (IPv4 and IPv6)
+    try:
+        ip = ipaddress.ip_address(candidate)
+        return str(ip)
+    except ValueError:
+        pass
+
+    # 2. Integer dword (e.g. 2130706433 -> 127.0.0.1)
+    # Range 16777216 (1.0.0.0) to 4294967295 (255.255.255.255) ensures small numbers like '12345'
+    # are not misclassified as IP addresses.
+    if candidate.isdigit():
+        try:
+            val = int(candidate, 10)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 3. Hexadecimal integer (e.g. 0x7f000001 -> 127.0.0.1)
+    if candidate.lower().startswith("0x"):
+        try:
+            val = int(candidate, 16)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 4. Octal single number (e.g. 017700000001 -> 127.0.0.1)
+    if candidate.startswith("0") and len(candidate) > 1 and all(c in "01234567" for c in candidate):
+        try:
+            val = int(candidate, 8)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 5. Dotted format with hex or octal octets (e.g. 0x7f.0.0.1, 0177.0.0.1)
+    parts = candidate.split(".")
+    if len(parts) == 4:
+        try:
+            octets = []
+            for p in parts:
+                if p.lower().startswith("0x"):
+                    octets.append(int(p, 16))
+                elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
+                    octets.append(int(p, 8))
+                elif p.isdigit():
+                    octets.append(int(p, 10))
+                else:
+                    return None
+            if all(0 <= o <= 255 for o in octets):
+                return str(ipaddress.IPv4Address(bytes(octets)))
+        except (ValueError, OverflowError):
+            pass
+
+    return None
+
+
 class URLFeatureExtractor:
     """
     Extracts 29 numerical and categorical features from raw URLs.
@@ -123,8 +195,9 @@ class URLFeatureExtractor:
                 remainder = parse_target.split("//", 1)[1]
             else:
                 remainder = parse_target
-            parts = remainder.split("/", 1)
-            host = parts[0].split("?", 1)[0].split("#", 1)[0]
+        canonical_ip = canonicalize_ip_host(host)
+        if canonical_ip:
+            host = canonical_ip
 
         registered_domain = self.get_registered_domain(host)
         return {
@@ -173,10 +246,19 @@ class URLFeatureExtractor:
                 if len(path_query) > 1:
                     query = path_query[1].split("#", 1)[0]
 
+        # IP Format Canonicalization (standard, dword integer, hex, octal, dotted-hex/octal)
+        canonical_ip = canonicalize_ip_host(host)
+        is_ip_detected = 1 if canonical_ip else 0
+        original_host = host
+        if canonical_ip:
+            host = canonical_ip
+
         # 3. Protocol stripping for raw URL lexical measurements
         text = SCHEME_REGEX.sub("", raw_url)
         if text.startswith("//"):
             text = text[2:]
+        if canonical_ip and original_host and original_host in text:
+            text = text.replace(original_host, canonical_ip, 1)
         text_len = len(text)
 
         # 4. Lexical character counts
@@ -237,15 +319,16 @@ class URLFeatureExtractor:
         param_count = sum(1 for param in query.split("&") if param)
         digit_ratio = (digits / text_len) if text_len > 0 else 0.0
 
-        # IP address check (handles IPv4 and IPv6)
-        is_ip = 0
-        clean_host = host.strip("[]")
-        if clean_host:
-            try:
-                ipaddress.ip_address(clean_host)
-                is_ip = 1
-            except ValueError:
-                is_ip = 0
+        # IP address check (handles standard IPv4, IPv6, and alternative canonicalized formats)
+        is_ip = is_ip_detected
+        if not is_ip:
+            clean_host = host.strip("[]")
+            if clean_host:
+                try:
+                    ipaddress.ip_address(clean_host)
+                    is_ip = 1
+                except ValueError:
+                    is_ip = 0
 
         # Punycode check
         has_punycode = 1 if "xn--" in host_lower else 0

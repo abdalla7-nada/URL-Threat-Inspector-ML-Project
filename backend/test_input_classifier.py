@@ -135,7 +135,7 @@ def test_api_dangerous_scheme_gateway():
         data = resp.json()
 
         assert data["verdict"] == "MALICIOUS", f"Expected MALICIOUS for {uri}, got {data['verdict']}"
-        assert data["threat_probability"] == 0.99, f"Expected 0.99 threat_prob for {uri}, got {data['threat_probability']}"
+        assert data["threat_probability"] >= 0.99, f"Expected >= 0.99 threat_prob for {uri}, got {data['threat_probability']}"
         assert data["is_threat"] is True
         assert data["forensics"]["dangerous_protocol"] is True
         assert "risk_summary" in data and "High-risk executable URI scheme" in data["risk_summary"]

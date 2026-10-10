@@ -35,7 +35,6 @@ ENTERPRISE_TRUSTED_DOMAINS: FrozenSet[str] = frozenset({
     "googleapis.com",
     "googlevideo.com",
     "gstatic.com",
-    "googleusercontent.com",
     "youtube.com",
     "gmail.com",
 
@@ -57,14 +56,13 @@ ENTERPRISE_TRUSTED_DOMAINS: FrozenSet[str] = frozenset({
 
     # Amazon
     "amazon.com",
-    "amazonaws.com",
     "aws.amazon.com",
     "amazon.eg",
     "cloudflare.com",
 
     # Developer & Open-Source Platforms
     "github.com",
-    "github.io",
+    "pages.github.com",
     "gitlab.com",
     "bitbucket.org",
     "stackoverflow.com",
@@ -110,14 +108,44 @@ ENTERPRISE_TRUSTED_DOMAINS: FrozenSet[str] = frozenset({
     "unsplash.com",
 })
 
+# Multi-tenant cloud hosting root domains where users or adversaries can deploy unvetted content.
+# These MUST NEVER be allowlisted at root or subdomain level.
+SHARED_MULTI_TENANT_DOMAINS: FrozenSet[str] = frozenset({
+    "github.io",
+    "vercel.app",
+    "firebaseapp.com",
+    "web.app",
+    "pages.dev",
+    "workers.dev",
+    "netlify.app",
+    "herokuapp.com",
+    "azurewebsites.net",
+    "amazonaws.com",
+    "s3.amazonaws.com",
+    "googleusercontent.com",
+    "glitch.me",
+    "surge.sh",
+    "ngrok-free.app",
+    "ngrok.io",
+})
+
 
 def is_allowlisted_domain(registered_domain: Optional[str]) -> bool:
     """
-    Check if a normalized registered root domain is present in the enterprise allowlist.
+    Check if a normalized registered root domain or host is present in the enterprise allowlist.
+    Enforces strict isolation of shared multi-tenant hosting platforms.
 
-    :param registered_domain: Normalized root domain (e.g. 'wikipedia.org', 'google.com').
+    :param registered_domain: Normalized root domain or host (e.g. 'wikipedia.org', 'google.com').
     :return: True if the domain is verified in the enterprise trust tier, False otherwise.
     """
     if not registered_domain:
         return False
-    return registered_domain.lower().strip() in ENTERPRISE_TRUSTED_DOMAINS
+    domain_clean = registered_domain.lower().strip()
+
+    # Strictly reject shared multi-tenant domains and their subdomains
+    if domain_clean in SHARED_MULTI_TENANT_DOMAINS or any(
+        domain_clean.endswith("." + mtd) for mtd in SHARED_MULTI_TENANT_DOMAINS
+    ):
+        return False
+
+    return domain_clean in ENTERPRISE_TRUSTED_DOMAINS

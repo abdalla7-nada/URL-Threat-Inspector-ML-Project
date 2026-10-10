@@ -67,29 +67,84 @@ _TLD_EXTRACTOR = tldextract.TLDExtract(
 )
 
 
-def parse_ip_address(host_str: str) -> Optional[Union[ipaddress.IPv4Address, ipaddress.IPv6Address]]:
-    """Parse string into IPv4 or IPv6 address, safely handling bracketed IPv6 and ports."""
+def canonicalize_ip_host(host_str: str) -> Optional[str]:
+    """
+    Normalizes standard IPv4, bracketed IPv6, and alternative IP representations
+    (dword integer, hex, octal, dotted-hex/octal) into standard dotted-decimal notation.
+    Returns None if the host string is not an IP address.
+    """
     if not host_str:
         return None
     clean = host_str.strip().strip("[]")
+    candidate = clean
+    if ":" in clean and not clean.startswith("0x"):
+        if clean.count(":") == 1:
+            candidate = clean.split(":")[0]
+
+    # 1. Standard ipaddress parser (IPv4 and IPv6)
     try:
-        return ipaddress.ip_address(clean)
+        ip = ipaddress.ip_address(candidate)
+        return str(ip)
     except ValueError:
         pass
 
-    # Check IPv4 with port (e.g. 192.168.1.1:8080)
-    if ":" in clean:
-        parts = clean.split(":")
-        if len(parts) == 2:
-            try:
-                return ipaddress.ip_address(parts[0])
-            except ValueError:
-                pass
-        # Check IPv6 with port (e.g. [2001:db8::1]:8080)
-        candidate, _, _ = clean.rpartition(":")
-        candidate_clean = candidate.strip("[]")
+    # 2. Integer dword (e.g. 2130706433 -> 127.0.0.1)
+    # Range 16777216 (1.0.0.0) to 4294967295 (255.255.255.255) ensures small numbers like '12345'
+    # are not misclassified as IP addresses.
+    if candidate.isdigit():
         try:
-            return ipaddress.ip_address(candidate_clean)
+            val = int(candidate, 10)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 3. Hexadecimal integer (e.g. 0x7f000001 -> 127.0.0.1)
+    if candidate.lower().startswith("0x"):
+        try:
+            val = int(candidate, 16)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 4. Octal single number (e.g. 017700000001 -> 127.0.0.1)
+    if candidate.startswith("0") and len(candidate) > 1 and all(c in "01234567" for c in candidate):
+        try:
+            val = int(candidate, 8)
+            if 16777216 <= val <= 0xFFFFFFFF:
+                return str(ipaddress.IPv4Address(val))
+        except (ValueError, OverflowError):
+            pass
+
+    # 5. Dotted format with hex or octal octets (e.g. 0x7f.0.0.1, 0177.0.0.1)
+    parts = candidate.split(".")
+    if len(parts) == 4:
+        try:
+            octets = []
+            for p in parts:
+                if p.lower().startswith("0x"):
+                    octets.append(int(p, 16))
+                elif p.startswith("0") and len(p) > 1 and all(c in "01234567" for c in p):
+                    octets.append(int(p, 8))
+                elif p.isdigit():
+                    octets.append(int(p, 10))
+                else:
+                    return None
+            if all(0 <= o <= 255 for o in octets):
+                return str(ipaddress.IPv4Address(bytes(octets)))
+        except (ValueError, OverflowError):
+            pass
+
+    return None
+
+
+def parse_ip_address(host_str: str) -> Optional[Union[ipaddress.IPv4Address, ipaddress.IPv6Address]]:
+    """Parse string into IPv4 or IPv6 address, safely handling bracketed IPv6, ports, and alt formats."""
+    canon = canonicalize_ip_host(host_str)
+    if canon:
+        try:
+            return ipaddress.ip_address(canon)
         except ValueError:
             pass
     return None
@@ -226,25 +281,35 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                 ),
             }
 
-    # 5. Single alphanumeric word or number check (e.g. '12345', 'paypal', 'facebook')
-    if not host and not raw_clean.startswith(("/", "?", "#", "http://", "https://", "//")):
+    # 5. Public Suffix (TLD) and Domain Integrity Verification
+    if not host and not raw_clean.startswith(("/", "?", "#")):
         return {
             "category": InputCategory.PLAIN_TEXT,
             "normalized_url": raw_clean,
-            "message": "Input is a single word or token without an internet domain suffix or path.",
+            "message": (
+                "Incomplete URL: Missing or invalid top-level domain suffix (e.g., .com, .org). "
+                "Please specify a complete domain target."
+            ),
         }
 
     if host:
-        tld_info = _TLD_EXTRACTOR(host_lower)
         is_ip = bool(parse_ip_address(host_lower))
-
-        if not tld_info.suffix and not is_ip:
-            # Host has no registered public suffix and is not an IP address (e.g. '12345', 'justaword')
-            if not raw_clean.startswith(("/", "?", "#", "//", "http://", "https://")):
+        if not is_ip:
+            tld_info = _TLD_EXTRACTOR(host_lower)
+            has_invalid_dots = (
+                ".." in host_lower
+                or host_lower.endswith(".")
+                or host_lower.startswith(".")
+            )
+            # Enforce strict public suffix presence (rejects https://www.wikipedia, https://google., test..com)
+            if not tld_info.suffix or not tld_info.domain or has_invalid_dots:
                 return {
                     "category": InputCategory.PLAIN_TEXT,
                     "normalized_url": raw_clean,
-                    "message": f"Host '{host}' does not have a recognized Top-Level Domain (TLD).",
+                    "message": (
+                        "Incomplete URL: Missing or invalid top-level domain suffix (e.g., .com, .org). "
+                        "Please specify a complete domain target."
+                    ),
                 }
 
     # 6. Valid Web Target Normalization

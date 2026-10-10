@@ -268,14 +268,15 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
     normalized_url = classification["normalized_url"]
 
     if category == InputCategory.PLAIN_TEXT:
+        msg = classification.get("message") or (
+            "Input is plain text or an incomplete query. "
+            "Please provide a resolvable domain or URL (e.g. example.com or https://example.com)."
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail={
                 "error_type": "INVALID_URL_SYNTAX",
-                "message": (
-                    "Input is plain text or an incomplete query. "
-                    "Please provide a resolvable domain or URL (e.g. example.com or https://example.com)."
-                ),
+                "message": msg,
             },
         )
 

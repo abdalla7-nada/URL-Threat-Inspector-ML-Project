@@ -46,7 +46,7 @@ def test_canonical_allowlist_expansion() -> None:
         ("https://aws.amazon.com", "Amazon Web Services Console"),
         ("https://amazon.eg", "Amazon Egypt Regional Domain"),
         ("https://icloud.com", "Apple iCloud Ecosystem"),
-        ("https://github.io", "GitHub Pages User Domain"),
+        ("https://pages.github.com", "GitHub Enterprise Pages"),
     ]
 
     for url, desc in canonical_vectors:
