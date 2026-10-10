@@ -19,6 +19,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import joblib
+import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 
@@ -108,7 +109,7 @@ class PureTreePredictor:
             raw_score = sum(self._eval_node(t["tree_structure"], feats) for t in self.tree_info)
             prob = 1.0 / (1.0 + math.exp(-raw_score))
             probs.append([1.0 - prob, prob])
-        return probs
+        return np.array(probs, dtype=float)
 
 
 def _resolve_trees_json() -> Optional[str]:
@@ -404,7 +405,13 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
     if hasattr(MODEL, "booster_"):
         proba = float(MODEL.booster_.predict(df_input, num_threads=1)[0])
     else:
-        proba = float(MODEL.predict_proba(df_input)[0, 1])
+        res = MODEL.predict_proba(df_input)
+        if isinstance(res, np.ndarray):
+            proba = float(res[0, 1])
+        elif isinstance(res, list):
+            proba = float(res[0][1])
+        else:
+            proba = float(res)
     threat_probability = round(proba, 4)
 
     # 6. Threat assessment and verdict assignment
