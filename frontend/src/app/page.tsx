@@ -101,8 +101,23 @@ export default function Home() {
     saveAuditRecords([]);
   };
 
+  if (!isMounted) {
+    return (
+      <div
+        suppressHydrationWarning
+        className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 bg-radar-grid"
+      >
+        <div className="w-full h-16 border-b border-zinc-800/80 bg-zinc-950/80" />
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 bg-radar-grid">
+    <div
+      suppressHydrationWarning
+      className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 bg-radar-grid"
+    >
       {/* Top SOC Navigation Bar */}
       <Header
         onOpenSpecs={() => setIsSpecsOpen(true)}
