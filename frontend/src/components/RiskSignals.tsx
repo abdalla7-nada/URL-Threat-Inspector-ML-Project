@@ -15,7 +15,7 @@ import { URLForensics } from '@/types/analysis';
 
 interface RiskSignalsProps {
   forensics: URLForensics;
-  verdict: 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS';
+  verdict: 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS' | 'INTERNAL_TARGET';
 }
 
 export function RiskSignals({ forensics, verdict }: RiskSignalsProps) {

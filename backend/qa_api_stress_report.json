@@ -1,0 +1,127 @@
+{
+  "timestamp": "2026-10-10T17:03:05Z",
+  "target_service": "CyberSec URL Threat Assessment API",
+  "api_endpoint": "/analyze",
+  "calibrated_threshold": 0.4705,
+  "scenarios": {
+    "input_sanitization": {
+      "total_tests": 6,
+      "passed": 6,
+      "details": [
+        {
+          "test_case": "Empty JSON Payload",
+          "description": "Assert HTTP 422 for missing required 'url' field.",
+          "status_code": 422,
+          "passed": true,
+          "latency_ms": 19.26,
+          "response_snippet": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\",\"url\"],\"msg\":\"Field required\",\"input\":{}}]}"
+        },
+        {
+          "test_case": "Whitespace-Only String",
+          "description": "Assert HTTP 422 for whitespace string.",
+          "status_code": 422,
+          "passed": true,
+          "latency_ms": 6.66,
+          "response_snippet": "{\"detail\":\"URL payload cannot be blank or empty.\"}"
+        },
+        {
+          "test_case": "Invalid Integer Type",
+          "description": "Assert HTTP 422 when non-string type is provided.",
+          "status_code": 422,
+          "passed": true,
+          "latency_ms": 4.03,
+          "response_snippet": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"url\"],\"msg\":\"Input should be a valid string\",\"input\":12345}]}"
+        },
+        {
+          "test_case": "Explicit Null URL",
+          "description": "Assert HTTP 422 when url is null.",
+          "status_code": 422,
+          "passed": true,
+          "latency_ms": 3.87,
+          "response_snippet": "{\"detail\":[{\"type\":\"string_type\",\"loc\":[\"body\",\"url\"],\"msg\":\"Input should be a valid string\",\"input\":null}]}"
+        },
+        {
+          "test_case": "XSS / Script Tag Injection",
+          "description": "Assert safe parse without 500 server crash or unhandled exception.",
+          "status_code": 400,
+          "passed": true,
+          "latency_ms": 114.21,
+          "response_snippet": "{\"detail\":{\"error_type\":\"INVALID_URL_SYNTAX\",\"message\":\"Input is plain text or an incomplete query. Please provide a res"
+        },
+        {
+          "test_case": "Malformed IPv6 Scheme (Unclosed Bracket)",
+          "description": "Assert graceful normalization without regex or parser crash.",
+          "status_code": 200,
+          "passed": true,
+          "latency_ms": 132.2,
+          "response_snippet": "{\"url\":\"http://[unclosed-bracket/path\",\"verdict\":\"MALICIOUS\",\"is_threat\":true,\"threat_probability\":0.7065,\"threshold_app"
+        }
+      ]
+    },
+    "contract_and_schema": {
+      "status": "PASSED",
+      "checkpoints": [
+        {
+          "check": "GET /health Verification",
+          "passed": true,
+          "detail": "Status='HEALTHY', Threshold=0.4705"
+        },
+        {
+          "check": "Contract Parity (/analyze vs /api/analyze)",
+          "passed": true,
+          "detail": "Identical schemas validated across 7 core fields. Verdict='BENIGN'"
+        },
+        {
+          "check": "Forensic Structural Integrity (10 Fields)",
+          "passed": true,
+          "detail": "All 10 forensic fields strictly typed: ['url_length', 'domain_length', 'path_depth', 'param_count', 'digit_ratio', 'has_ip_host', 'has_punycode', 'host_entropy', 'suspicious_keywords_count', 'tld']"
+        }
+      ],
+      "forensic_type_mapping": {
+        "url_length": "int (val=59)",
+        "domain_length": "int (val=14)",
+        "path_depth": "int (val=2)",
+        "param_count": "int (val=1)",
+        "digit_ratio": "float (val=0.0678)",
+        "has_ip_host": "bool (val=False)",
+        "has_punycode": "bool (val=False)",
+        "host_entropy": "float (val=3.0391)",
+        "suspicious_keywords_count": "int (val=0)",
+        "tld": "str (val=com)"
+      }
+    },
+    "concurrency_stress": {
+      "status": "PASSED",
+      "total_requests": 50,
+      "concurrency_workers": 5,
+      "total_execution_time_ms": 546.78,
+      "throughput_rps": 91.4,
+      "status_distribution": {
+        "200": 50
+      },
+      "server_latency_stats": {
+        "mean": 6.19,
+        "p50": 7.28,
+        "p95": 14.85,
+        "p99": 16.6,
+        "max": 16.6,
+        "min": 0.06
+      },
+      "wall_latency_stats": {
+        "mean": 52.46,
+        "p50": 54.53,
+        "p95": 77.32,
+        "p99": 95.27,
+        "max": 95.27,
+        "min": 15.53
+      },
+      "threshold_verified": 0.4705,
+      "sample_verdicts": {
+        "benign_count": 23,
+        "suspicious_count": 12,
+        "malicious_count": 13
+      }
+    }
+  },
+  "overall_status": "100% SUCCESS"
+}

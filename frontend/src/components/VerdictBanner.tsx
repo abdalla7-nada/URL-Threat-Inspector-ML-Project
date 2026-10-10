@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
+  Server,
   Clock,
   Lock,
   Unlock,
@@ -92,7 +93,31 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
         'Critical phishing heuristics identified (e.g. social engineering lures, high entropy, or raw IP host addressing).',
       barColor: 'bg-rose-500',
     },
-  }[verdict];
+    INTERNAL_TARGET: {
+      border: 'border-indigo-800/60',
+      bg: 'bg-indigo-950/40',
+      glow: 'shadow-[0_0_35px_rgba(99,102,241,0.12)]',
+      text: 'text-indigo-400',
+      badgeBg: 'bg-indigo-900/60',
+      badgeBorder: 'border-indigo-700/70',
+      icon: Server,
+      headline: 'INTERNAL TARGET / PRIVATE HOST',
+      description:
+        'This target points to loopback or private network infrastructure (RFC 1918) and cannot be assessed as a public web threat.',
+      barColor: 'bg-indigo-500',
+    },
+  }[verdict] || {
+    border: 'border-zinc-800/50',
+    bg: 'bg-zinc-950/40',
+    glow: '',
+    text: 'text-zinc-400',
+    badgeBg: 'bg-zinc-900/50',
+    badgeBorder: 'border-zinc-700/60',
+    icon: ShieldCheck,
+    headline: 'INSPECTED ENDPOINT',
+    description: 'URL inspection completed.',
+    barColor: 'bg-zinc-500',
+  };
 
   const VerdictIcon = theme.icon;
 
@@ -119,11 +144,26 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
               <span
                 className={`px-2.5 py-0.5 rounded text-xs font-mono font-semibold uppercase tracking-wider border ${theme.badgeBorder} ${theme.badgeBg} ${theme.text}`}
               >
-                {verdict}
+                {verdict === 'INTERNAL_TARGET' ? 'INTERNAL / PRIVATE HOST' : verdict}
               </span>
+              {analysis.forensics?.is_allowlisted && (
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-semibold uppercase tracking-wider border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+                  ALLOWLIST VERIFIED
+                </span>
+              )}
+              {analysis.forensics?.dangerous_protocol && (
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase tracking-wider border border-rose-500/70 bg-rose-500/20 text-rose-300 shadow-[0_0_12px_rgba(244,63,94,0.35)] animate-pulse">
+                  CRITICAL: SCRIPT/URI INJECTION
+                </span>
+              )}
             </div>
             <p className="mt-1 text-sm text-zinc-300 max-w-2xl leading-relaxed">
-              {theme.description}
+              {analysis.risk_summary ||
+                (verdict === 'INTERNAL_TARGET'
+                  ? 'This target points to loopback or private network infrastructure (RFC 1918) and cannot be assessed as a public web threat.'
+                  : analysis.forensics?.is_allowlisted
+                  ? 'Pre-approved high-reputation domain verified by Enterprise Trust Tier. Short-circuited safely per SOC gateway standards.'
+                  : theme.description)}
             </p>
           </div>
         </div>
@@ -131,14 +171,16 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
         {/* Right: Numerical Threat Probability */}
         <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-1 shrink-0 font-mono">
           <div className="text-xs uppercase text-zinc-500 tracking-wider">
-            Threat Probability Score
+            {verdict === 'INTERNAL_TARGET' ? 'Informational Baseline' : 'Threat Probability Score'}
           </div>
           <div className="flex items-baseline gap-2">
             <span className={`text-4xl sm:text-5xl font-black ${theme.text}`}>
-              {(threat_probability * 100).toFixed(1)}%
+              {verdict === 'INTERNAL_TARGET' ? '10.0%' : `${(threat_probability * 100).toFixed(1)}%`}
             </span>
             <span className="text-xs text-zinc-500">
-              / threshold {(threshold_applied * 100).toFixed(1)}%
+              {verdict === 'INTERNAL_TARGET'
+                ? '(Non-Routable Baseline)'
+                : `/ threshold ${(threshold_applied * 100).toFixed(1)}%`}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-1 text-xs text-zinc-400">
@@ -202,7 +244,7 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
           {/* Active Probability Bar */}
           <div
             className={`h-full rounded-full ${theme.barColor} transition-all duration-700 ease-out`}
-            style={{ width: `${scorePct}%` }}
+            style={{ width: `${verdict === 'INTERNAL_TARGET' ? 10 : scorePct}%` }}
           />
 
           {/* Enforced Threshold Marker Line */}

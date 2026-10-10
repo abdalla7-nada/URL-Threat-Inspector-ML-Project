@@ -41,11 +41,10 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (err: unknown) {
-    const errorMsg =
-      err instanceof Error ? err.message : 'Internal Server Error';
     return NextResponse.json(
       {
-        detail: `Failed to proxy inspection to backend: ${errorMsg}`,
+        detail:
+          'Inspection engine unreachable. Please ensure the backend service is running.',
       },
       { status: 502 }
     );

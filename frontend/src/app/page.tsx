@@ -20,7 +20,8 @@ import { ForensicsGrid } from '@/components/ForensicsGrid';
 import { RiskSignals } from '@/components/RiskSignals';
 import { AuditLog, AuditRecord } from '@/components/AuditLog';
 import { EngineSpecsModal } from '@/components/EngineSpecsModal';
-import { inspectUrl } from '@/lib/api';
+import { SyntaxNoticeBanner } from '@/components/SyntaxNoticeBanner';
+import { inspectUrl, ApiError } from '@/lib/api';
 import { URLAnalysisResponse } from '@/types/analysis';
 
 const INITIAL_DEMO_URL =
@@ -30,6 +31,11 @@ export default function Home() {
   const [analysis, setAnalysis] = useState<URLAnalysisResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [syntaxNotice, setSyntaxNotice] = useState<{
+    title: string;
+    message: string;
+    recommendation?: string;
+  } | null>(null);
   const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -63,10 +69,12 @@ export default function Home() {
   const handleInspect = async (url: string) => {
     setIsLoading(true);
     setErrorMessage(null);
+    setSyntaxNotice(null);
 
     try {
       const result = await inspectUrl(url);
       setAnalysis(result);
+      setSyntaxNotice(null);
 
       // Append to audit trail
       const newRecord: AuditRecord = {
@@ -83,9 +91,33 @@ export default function Home() {
       const updated = [newRecord, ...auditRecords.slice(0, 19)];
       saveAuditRecords(updated);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Inspection execution failed.';
-      setErrorMessage(msg);
+      if (err instanceof ApiError && err.errorType === 'INVALID_URL_SYNTAX') {
+        setSyntaxNotice({
+          title: 'INVALID INPUT SYNTAX',
+          message: err.message,
+          recommendation:
+            'Please ensure your input contains a valid top-level domain or network protocol.',
+        });
+        setAnalysis(null);
+      } else {
+        const msg =
+          err instanceof Error ? err.message : 'Inspection execution failed.';
+        if (
+          msg.includes('INVALID_URL_SYNTAX') ||
+          msg.toLowerCase().includes('plain text') ||
+          msg.toLowerCase().includes('incomplete query')
+        ) {
+          setSyntaxNotice({
+            title: 'INVALID INPUT SYNTAX',
+            message: msg.replace(/\[?INVALID_URL_SYNTAX\]?:?\s*/i, ''),
+            recommendation:
+              'Please ensure your input contains a valid top-level domain or network protocol.',
+          });
+          setAnalysis(null);
+        } else {
+          setErrorMessage(msg);
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +126,7 @@ export default function Home() {
   const handleSelectAudit = (record: AuditRecord) => {
     setAnalysis(record.data);
     setErrorMessage(null);
+    setSyntaxNotice(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -148,6 +181,18 @@ export default function Home() {
         <section aria-label="URL Inspection Console">
           <InspectionForm onInspect={handleInspect} isLoading={isLoading} />
         </section>
+
+        {/* Input Syntax Notice Banner (HTTP 400 Gateway Rejection) */}
+        {syntaxNotice && (
+          <div className="animate-in fade-in duration-300">
+            <SyntaxNoticeBanner
+              title={syntaxNotice.title}
+              message={syntaxNotice.message}
+              recommendation={syntaxNotice.recommendation}
+              onDismiss={() => setSyntaxNotice(null)}
+            />
+          </div>
+        )}
 
         {/* Error Notification Banner */}
         {errorMessage && (

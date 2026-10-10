@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Terminal, ArrowUpRight, Activity } from 'lucide-react';
+import { Search, Terminal, ArrowUpRight, Activity, Info } from 'lucide-react';
 
 interface InspectionFormProps {
   onInspect: (url: string) => Promise<void>;
@@ -34,11 +34,16 @@ const PRESET_TARGETS = [
 export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
   const [inputUrl, setInputUrl] = useState('');
 
+  const trimmed = inputUrl.trim();
+  const isPlainWordsWithoutDomain =
+    trimmed.length > 0 && !trimmed.includes('.') && !trimmed.includes('/');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputUrl.trim() && !isLoading) {
-      onInspect(inputUrl.trim());
+    if (!trimmed || isLoading) {
+      return;
     }
+    onInspect(trimmed);
   };
 
   const handleSelectPreset = (url: string) => {
@@ -98,6 +103,14 @@ export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
           </div>
         </div>
       </form>
+
+      {/* Real-time Format Awareness Helper Text */}
+      {isPlainWordsWithoutDomain && (
+        <div className="mt-2.5 px-1 flex items-center gap-1.5 text-xs font-mono text-zinc-500 animate-in fade-in duration-200">
+          <Info className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+          <span>Hint: Enter a resolvable domain or full URL (e.g., domain.com or https://...)</span>
+        </div>
+      )}
 
       {/* Preset Targets Quick Selection */}
       <div className="mt-3 flex flex-wrap items-center gap-2 pt-1">

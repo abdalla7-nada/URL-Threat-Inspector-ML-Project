@@ -94,6 +94,44 @@ class URLFeatureExtractor:
             self._host_tld_cache[host] = cached
         return cached
 
+    def get_registered_domain(self, host: str) -> str:
+        """
+        Extract the registered root domain (e.g. 'wikipedia.org' from 'en.wikipedia.org').
+        Returns empty string if host is an IP address or missing.
+        """
+        if not host:
+            return ""
+        host_clean = host.lower().strip()
+        tld_info = self._get_tld_info(host_clean)
+        if tld_info and tld_info.domain and tld_info.suffix:
+            return f"{tld_info.domain.lower()}.{tld_info.suffix.lower()}"
+        return ""
+
+    def extract_domain_info(self, url: str) -> Dict[str, str]:
+        """
+        Extract normalized host and registered root domain from a raw URL.
+        """
+        parse_target = url.strip() if isinstance(url, str) else str(url).strip()
+        if not SCHEME_REGEX.match(parse_target) and not parse_target.startswith("//"):
+            parse_target = "//" + parse_target
+        try:
+            parsed = urlsplit(parse_target)
+            host = parsed.hostname or ""
+        except Exception:
+            host = ""
+            if "//" in parse_target:
+                remainder = parse_target.split("//", 1)[1]
+            else:
+                remainder = parse_target
+            parts = remainder.split("/", 1)
+            host = parts[0].split("?", 1)[0].split("#", 1)[0]
+
+        registered_domain = self.get_registered_domain(host)
+        return {
+            "host": host.lower() if host else "",
+            "registered_domain": registered_domain,
+        }
+
     def extract(self, url: str) -> Dict[str, Union[int, float, str]]:
         """
         Extract features from a single raw URL.

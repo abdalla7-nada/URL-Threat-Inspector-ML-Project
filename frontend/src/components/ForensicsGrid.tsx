@@ -116,9 +116,17 @@ export function ForensicsGrid({ forensics }: ForensicsGridProps) {
             STRUCTURAL & LEXICAL FORENSICS BREAKDOWN
           </h3>
         </div>
-        <span className="text-xs font-mono text-zinc-500">
-          10 Extracted Forensic Indicators
-        </span>
+        <div className="flex items-center gap-2">
+          {forensics.is_allowlisted && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <CheckCircle2 className="w-3 h-3" />
+              ALLOWLISTED
+            </span>
+          )}
+          <span className="text-xs font-mono text-zinc-500">
+            10 Extracted Forensic Indicators
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">

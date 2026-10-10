@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-10-10T17:26:51.980Z",
+  "service": "CyberSec URL Threat Assessment Web Application",
+  "environment": "Local Next.js 15 + FastAPI Monorepo",
+  "scenarios": {
+    "proxy_end_to_end": {
+      "status": "PASSED",
+      "vectors_tested": [
+        {
+          "vector": "Vector A (Benign Wikipedia)",
+          "url": "https://www.wikipedia.org/wiki/Computer_security",
+          "verdict": "BENIGN",
+          "is_threat": false,
+          "threat_probability": 0.01,
+          "punycode": false,
+          "roundtrip_ms": 54.2,
+          "server_latency_ms": 0.29,
+          "passed": true
+        },
+        {
+          "vector": "Vector B (Raw IP Host Phishing)",
+          "url": "http://192.168.1.1/login-admin-verify-password",
+          "verdict": "MALICIOUS",
+          "is_threat": true,
+          "threat_probability": 0.8952,
+          "punycode": false,
+          "roundtrip_ms": 48.75,
+          "server_latency_ms": 5.25,
+          "passed": true
+        },
+        {
+          "vector": "Vector C (Brand Spoofing Lure)",
+          "url": "https://secure-login-verify-account.example.com/update",
+          "verdict": "SUSPICIOUS",
+          "is_threat": true,
+          "threat_probability": 0.5918,
+          "punycode": false,
+          "roundtrip_ms": 43.8,
+          "server_latency_ms": 4.55,
+          "passed": true
+        },
+        {
+          "vector": "Vector D (Punycode IDN Vector)",
+          "url": "https://xn--bcher-kva.com/auth-signin",
+          "verdict": "BENIGN",
+          "is_threat": false,
+          "threat_probability": 0.294,
+          "punycode": true,
+          "roundtrip_ms": 49.88,
+          "server_latency_ms": 7.18,
+          "passed": true
+        }
+      ],
+      "latency_profile": {
+        "min_ms": 37.05,
+        "mean_ms": 49.54,
+        "samples": 9,
+        "under_50ms": true
+      }
+    },
+    "graceful_degradation": {
+      "status": "PASSED",
+      "unreachable_status_code": 502,
+      "error_notification": "Inspection engine unreachable. Please ensure the backend service is running.",
+      "route_handler_verified": true,
+      "api_client_verified": true
+    },
+    "zero_ai_and_security_invariants": {
+      "status": "PASSED",
+      "files_scanned": 13,
+      "forbidden_icon_violations": 0,
+      "forbidden_buzzword_violations": 0,
+      "non_english_violations": 0,
+      "layout_html_suppress_hydration": true,
+      "layout_body_suppress_hydration": true
+    }
+  },
+  "overall_status": "100% SUCCESS"
+}

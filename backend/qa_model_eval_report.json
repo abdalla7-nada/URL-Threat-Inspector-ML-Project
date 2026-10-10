@@ -1,0 +1,887 @@
+{
+  "timestamp": "2026-10-10T16:32:35Z",
+  "model_artifact": "D:\\1_Summer_Intrernships\\Creative_ML\\Final_Project\\url_project\\backend\\model\\phishing_model.joblib",
+  "calibrated_threshold": 0.4705,
+  "feature_count": 29,
+  "top_tlds_count": 50,
+  "latency_metrics": {
+    "mean_ext_ms": 0.29,
+    "mean_inf_ms": 4.85,
+    "mean_total_ms": 5.13,
+    "p95_total_ms": 7.62,
+    "max_total_ms": 7.81,
+    "min_total_ms": 3.73
+  },
+  "category_summary": {
+    "Category 1: Complex Benign Enterprise": {
+      "total": 5,
+      "passed": 5,
+      "pass_rate_pct": 100.0,
+      "avg_latency_ms": 4.83,
+      "threat_flagged_count": 0
+    },
+    "Category 2: Classic & Aggressive Phishing": {
+      "total": 5,
+      "passed": 5,
+      "pass_rate_pct": 100.0,
+      "avg_latency_ms": 4.73,
+      "threat_flagged_count": 5
+    },
+    "Category 3: Obfuscated & Evasion Vectors": {
+      "total": 5,
+      "passed": 5,
+      "pass_rate_pct": 100.0,
+      "avg_latency_ms": 4.89,
+      "threat_flagged_count": 5
+    },
+    "Category 4: Extreme Boundary & Stress Vectors": {
+      "total": 5,
+      "passed": 5,
+      "pass_rate_pct": 100.0,
+      "avg_latency_ms": 6.08,
+      "threat_flagged_count": 1
+    }
+  },
+  "results": [
+    {
+      "category": "Category 1: Complex Benign Enterprise",
+      "name": "AWS S3 Pricing Query",
+      "url": "https://aws.amazon.com/s3/pricing/?nc2=h_ql_pr_s3#Amazon_S3_pricing",
+      "full_url_length": 67,
+      "verdict": "BENIGN",
+      "threat_probability": 0.1204,
+      "expected": "BENIGN",
+      "passed": true,
+      "latency_ext_ms": 0.183,
+      "latency_inf_ms": 3.641,
+      "latency_total_ms": 3.824,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 1,
+          "contribution": 1.502
+        },
+        {
+          "feature": "underscore_count",
+          "value": 5,
+          "contribution": -0.892
+        },
+        {
+          "feature": "host_entropy",
+          "value": 3.039148671903071,
+          "contribution": 0.411
+        },
+        {
+          "feature": "hyphen_count",
+          "value": 0,
+          "contribution": 0.354
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.04,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 1: Complex Benign Enterprise",
+      "name": "MDN Web Documentation",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization",
+      "full_url_length": 71,
+      "verdict": "BENIGN",
+      "threat_probability": 0.4312,
+      "expected": "BENIGN",
+      "passed": true,
+      "latency_ext_ms": 0.181,
+      "latency_inf_ms": 3.946,
+      "latency_total_ms": 4.127,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 1,
+          "contribution": 1.121
+        },
+        {
+          "feature": "slash_count",
+          "value": 6,
+          "contribution": 0.935
+        },
+        {
+          "feature": "underscore_count",
+          "value": 0,
+          "contribution": 0.246
+        },
+        {
+          "feature": "domain_length",
+          "value": 21,
+          "contribution": 0.223
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.52,
+        "tld": "org"
+      }
+    },
+    {
+      "category": "Category 1: Complex Benign Enterprise",
+      "name": "Unsplash High-Res CDN",
+      "url": "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=...",
+      "full_url_length": 93,
+      "verdict": "BENIGN",
+      "threat_probability": 0.3398,
+      "expected": "BENIGN",
+      "passed": true,
+      "latency_ext_ms": 0.189,
+      "latency_inf_ms": 3.841,
+      "latency_total_ms": 4.03,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 1,
+          "contribution": 1.435
+        },
+        {
+          "feature": "digit_count",
+          "value": 27,
+          "contribution": 0.5
+        },
+        {
+          "feature": "special_count",
+          "value": 13,
+          "contribution": -0.384
+        },
+        {
+          "feature": "digit_ratio",
+          "value": 0.3176470588235294,
+          "contribution": 0.382
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.68,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 1: Complex Benign Enterprise",
+      "name": "GitHub Linux Commit SHA",
+      "url": "https://github.com/torvalds/linux/commit/1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+      "full_url_length": 73,
+      "verdict": "BENIGN",
+      "threat_probability": 0.0486,
+      "expected": "BENIGN",
+      "passed": true,
+      "latency_ext_ms": 0.179,
+      "latency_inf_ms": 4.4,
+      "latency_total_ms": 4.579,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 0,
+          "contribution": -0.639
+        },
+        {
+          "feature": "domain_length",
+          "value": 10,
+          "contribution": -0.608
+        },
+        {
+          "feature": "hyphen_count",
+          "value": 0,
+          "contribution": 0.389
+        },
+        {
+          "feature": "host_entropy",
+          "value": 3.321928094887362,
+          "contribution": 0.371
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.32,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 1: Complex Benign Enterprise",
+      "name": "Wikipedia Current Events Portal",
+      "url": "https://en.wikipedia.org/wiki/Portal:Current_events",
+      "full_url_length": 51,
+      "verdict": "BENIGN",
+      "threat_probability": 0.0375,
+      "expected": "BENIGN",
+      "passed": true,
+      "latency_ext_ms": 0.201,
+      "latency_inf_ms": 7.408,
+      "latency_total_ms": 7.609,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 1,
+          "contribution": 1.114
+        },
+        {
+          "feature": "underscore_count",
+          "value": 1,
+          "contribution": -0.621
+        },
+        {
+          "feature": "host_entropy",
+          "value": 3.452819531114783,
+          "contribution": -0.4
+        },
+        {
+          "feature": "slash_count",
+          "value": 2,
+          "contribution": -0.316
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.45,
+        "tld": "org"
+      }
+    },
+    {
+      "category": "Category 2: Classic & Aggressive Phishing",
+      "name": "Raw IP Host + Banking Lure",
+      "url": "http://192.168.1.105/secure-banking/update-wallet-verification.php",
+      "full_url_length": 66,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.8858,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.168,
+      "latency_inf_ms": 5.809,
+      "latency_total_ms": 5.977,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 2.152
+        },
+        {
+          "feature": "has_ip",
+          "value": 1,
+          "contribution": 1.307
+        },
+        {
+          "feature": "host_digit_count",
+          "value": 10,
+          "contribution": 1.217
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 4,
+          "contribution": 0.871
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": true,
+        "has_punycode": false,
+        "suspicious_count": 4,
+        "host_entropy": 2.72,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 2: Classic & Aggressive Phishing",
+      "name": "PayPal Deceptive Chain",
+      "url": "http://paypal-verification-center-update.com/signin/account-review",
+      "full_url_length": 66,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.8216,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.175,
+      "latency_inf_ms": 3.765,
+      "latency_total_ms": 3.94,
+      "top_features": [
+        {
+          "feature": "suspicious_count",
+          "value": 3,
+          "contribution": 1.919
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 1.107
+        },
+        {
+          "feature": "domain_length",
+          "value": 37,
+          "contribution": 0.663
+        },
+        {
+          "feature": "hyphen_count",
+          "value": 4,
+          "contribution": -0.412
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 3,
+        "host_entropy": 3.97,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 2: Classic & Aggressive Phishing",
+      "name": "Microsoft Deceptive Subdomain",
+      "url": "http://login.microsoftonline.com.security-auth-check.xyz/login.srf",
+      "full_url_length": 66,
+      "verdict": "SUSPICIOUS",
+      "threat_probability": 0.5407,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.192,
+      "latency_inf_ms": 3.537,
+      "latency_total_ms": 3.729,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 1.149
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 3,
+          "contribution": 0.822
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 2,
+          "contribution": 0.589
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 1,
+          "contribution": 0.322
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 1,
+        "host_entropy": 4.2,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 2: Classic & Aggressive Phishing",
+      "name": "AppleID Spoofing Multi-token",
+      "url": "http://appleid.apple.com.manage-verify-profile.cc/id/login",
+      "full_url_length": 58,
+      "verdict": "SUSPICIOUS",
+      "threat_probability": 0.5486,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.19,
+      "latency_inf_ms": 3.718,
+      "latency_total_ms": 3.908,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 1.088
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 3,
+          "contribution": 0.892
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 2,
+          "contribution": 0.52
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 2,
+          "contribution": 0.41
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 2,
+        "host_entropy": 3.88,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 2: Classic & Aggressive Phishing",
+      "name": "Blockchain Wallet Credential Lure",
+      "url": "http://blockchain-wallet-restore-privatekey.top/restore",
+      "full_url_length": 55,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.7518,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 1.706,
+      "latency_inf_ms": 4.413,
+      "latency_total_ms": 6.119,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 1.702
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 1.092
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 1,
+          "contribution": 0.619
+        },
+        {
+          "feature": "domain_length",
+          "value": 40,
+          "contribution": 0.529
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 1,
+        "host_entropy": 4.04,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 3: Obfuscated & Evasion Vectors",
+      "name": "Punycode IDN Spoofing",
+      "url": "https://xn--bcher-kva.example.com/login",
+      "full_url_length": 39,
+      "verdict": "SUSPICIOUS",
+      "threat_probability": 0.4762,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.174,
+      "latency_inf_ms": 4.085,
+      "latency_total_ms": 4.259,
+      "top_features": [
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 0.848
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 1,
+          "contribution": 0.847
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 1,
+          "contribution": 0.573
+        },
+        {
+          "feature": "url_length",
+          "value": 31,
+          "contribution": 0.315
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": true,
+        "suspicious_count": 1,
+        "host_entropy": 3.86,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 3: Obfuscated & Evasion Vectors",
+      "name": "@ Redirection Obfuscation",
+      "url": "http://secure.bank@phishing-target.net/verify",
+      "full_url_length": 45,
+      "verdict": "SUSPICIOUS",
+      "threat_probability": 0.5422,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.181,
+      "latency_inf_ms": 6.697,
+      "latency_total_ms": 6.878,
+      "top_features": [
+        {
+          "feature": "at_count",
+          "value": 1,
+          "contribution": 1.629
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 2,
+          "contribution": 0.748
+        },
+        {
+          "feature": "equal_count",
+          "value": 0,
+          "contribution": -0.611
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 0,
+          "contribution": -0.448
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 2,
+        "host_entropy": 3.47,
+        "tld": "net"
+      }
+    },
+    {
+      "category": "Category 3: Obfuscated & Evasion Vectors",
+      "name": "Google Brand Impersonation Domain",
+      "url": "https://accounts.google.com-recovery-portal-2026.net/identity",
+      "full_url_length": 61,
+      "verdict": "SUSPICIOUS",
+      "threat_probability": 0.5127,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.199,
+      "latency_inf_ms": 4.144,
+      "latency_total_ms": 4.343,
+      "top_features": [
+        {
+          "feature": "subdomain_count",
+          "value": 2,
+          "contribution": 1.033
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 0.897
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 1,
+          "contribution": 0.461
+        },
+        {
+          "feature": "domain_length",
+          "value": 44,
+          "contribution": 0.375
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 1,
+        "host_entropy": 4.08,
+        "tld": "net"
+      }
+    },
+    {
+      "category": "Category 3: Obfuscated & Evasion Vectors",
+      "name": "Private IP Host + Multiple Slashes",
+      "url": "http://10.0.0.1:8080/path///extra//slashes/update",
+      "full_url_length": 49,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.9185,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.157,
+      "latency_inf_ms": 3.742,
+      "latency_total_ms": 3.899,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 1.473
+        },
+        {
+          "feature": "has_ip",
+          "value": 1,
+          "contribution": 1.388
+        },
+        {
+          "feature": "slash_count",
+          "value": 7,
+          "contribution": 0.909
+        },
+        {
+          "feature": "host_digit_count",
+          "value": 5,
+          "contribution": 0.7
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": true,
+        "has_punycode": false,
+        "suspicious_count": 1,
+        "host_entropy": 1.56,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 3: Obfuscated & Evasion Vectors",
+      "name": "Netflix Billing Lure Suffix",
+      "url": "https://netflix-subscription-renew-account-update-billing-profile.site",
+      "full_url_length": 70,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.9976,
+      "expected": "THREAT",
+      "passed": true,
+      "latency_ext_ms": 0.181,
+      "latency_inf_ms": 4.883,
+      "latency_total_ms": 5.064,
+      "top_features": [
+        {
+          "feature": "path_length",
+          "value": 0,
+          "contribution": 5.998
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 2,
+          "contribution": 0.968
+        },
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 0.955
+        },
+        {
+          "feature": "host_hyphen_count",
+          "value": 6,
+          "contribution": 0.538
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 2,
+        "host_entropy": 4.08,
+        "tld": "other"
+      }
+    },
+    {
+      "category": "Category 4: Extreme Boundary & Stress Vectors",
+      "name": "Ultra-Long URL (> 2,500 chars)",
+      "url": "https://test.com/sub/path/sub/path/sub/path/sub/path/sub/path/sub/path/sub/pa...",
+      "full_url_length": 2604,
+      "verdict": "BENIGN",
+      "threat_probability": 0.0438,
+      "expected": "ANY",
+      "passed": true,
+      "latency_ext_ms": 0.586,
+      "latency_inf_ms": 6.158,
+      "latency_total_ms": 6.744,
+      "top_features": [
+        {
+          "feature": "slash_count",
+          "value": 241,
+          "contribution": 1.098
+        },
+        {
+          "feature": "domain_length",
+          "value": 8,
+          "contribution": -0.935
+        },
+        {
+          "feature": "path_depth",
+          "value": 240,
+          "contribution": -0.836
+        },
+        {
+          "feature": "url_length",
+          "value": 2596,
+          "contribution": 0.72
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 2.75,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 4: Extreme Boundary & Stress Vectors",
+      "name": "Protocol-Relative Leading Slash",
+      "url": "//raw-scheme-less-target.com/path",
+      "full_url_length": 33,
+      "verdict": "BENIGN",
+      "threat_probability": 0.083,
+      "expected": "ANY",
+      "passed": true,
+      "latency_ext_ms": 0.373,
+      "latency_inf_ms": 7.44,
+      "latency_total_ms": 7.813,
+      "top_features": [
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 1.264
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 0,
+          "contribution": -0.826
+        },
+        {
+          "feature": "slash_count",
+          "value": 1,
+          "contribution": -0.352
+        },
+        {
+          "feature": "hyphen_count",
+          "value": 3,
+          "contribution": -0.344
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.64,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 4: Extreme Boundary & Stress Vectors",
+      "name": "Scheme-less Domain + Path",
+      "url": "domain-with-no-protocol.org/test-page",
+      "full_url_length": 37,
+      "verdict": "BENIGN",
+      "threat_probability": 0.0342,
+      "expected": "ANY",
+      "passed": true,
+      "latency_ext_ms": 0.163,
+      "latency_inf_ms": 3.792,
+      "latency_total_ms": 3.955,
+      "top_features": [
+        {
+          "feature": "host_hyphen_count",
+          "value": 3,
+          "contribution": 1.005
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 0,
+          "contribution": -0.805
+        },
+        {
+          "feature": "hyphen_count",
+          "value": 4,
+          "contribution": -0.501
+        },
+        {
+          "feature": "slash_count",
+          "value": 1,
+          "contribution": -0.382
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 3.71,
+        "tld": "org"
+      }
+    },
+    {
+      "category": "Category 4: Extreme Boundary & Stress Vectors",
+      "name": "Userinfo + Port + Fragment Anchor",
+      "url": "https://user:password@domain.com:8443/auth?token=123#section",
+      "full_url_length": 60,
+      "verdict": "BENIGN",
+      "threat_probability": 0.3485,
+      "expected": "ANY",
+      "passed": true,
+      "latency_ext_ms": 0.173,
+      "latency_inf_ms": 4.485,
+      "latency_total_ms": 4.658,
+      "top_features": [
+        {
+          "feature": "at_count",
+          "value": 1,
+          "contribution": 2.155
+        },
+        {
+          "feature": "suspicious_count",
+          "value": 1,
+          "contribution": 1.024
+        },
+        {
+          "feature": "domain_length",
+          "value": 10,
+          "contribution": -0.547
+        },
+        {
+          "feature": "equal_count",
+          "value": 1,
+          "contribution": 0.492
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": false,
+        "has_punycode": false,
+        "suspicious_count": 1,
+        "host_entropy": 2.92,
+        "tld": "com"
+      }
+    },
+    {
+      "category": "Category 4: Extreme Boundary & Stress Vectors",
+      "name": "IPv6 Bracketed Localhost",
+      "url": "http://[::1]/ipv6-localhost-test",
+      "full_url_length": 32,
+      "verdict": "MALICIOUS",
+      "threat_probability": 0.7392,
+      "expected": "ANY",
+      "passed": true,
+      "latency_ext_ms": 0.172,
+      "latency_inf_ms": 7.053,
+      "latency_total_ms": 7.225,
+      "top_features": [
+        {
+          "feature": "tld",
+          "value": "other",
+          "contribution": 2.571
+        },
+        {
+          "feature": "has_ip",
+          "value": 1,
+          "contribution": 1.361
+        },
+        {
+          "feature": "subdomain_count",
+          "value": 0,
+          "contribution": -0.714
+        },
+        {
+          "feature": "url_length",
+          "value": 25,
+          "contribution": 0.356
+        }
+      ],
+      "forensic_summary": {
+        "has_ip": true,
+        "has_punycode": false,
+        "suspicious_count": 0,
+        "host_entropy": 0.92,
+        "tld": "other"
+      }
+    }
+  ]
+}

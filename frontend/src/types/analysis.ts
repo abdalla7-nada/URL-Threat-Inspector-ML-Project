@@ -14,16 +14,19 @@ export interface URLForensics {
   host_entropy: number;
   suspicious_keywords_count: number;
   tld: string;
+  is_allowlisted?: boolean;
+  dangerous_protocol?: boolean;
 }
 
 export interface URLAnalysisResponse {
   url: string;
-  verdict: 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS';
+  verdict: 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS' | 'INTERNAL_TARGET';
   is_threat: boolean;
   threat_probability: number;
   threshold_applied: number;
   latency_ms: number;
   forensics: URLForensics;
+  risk_summary?: string;
 }
 
 export interface URLAnalysisRequest {

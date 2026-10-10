@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
+  Server,
   FileCode,
 } from 'lucide-react';
 import { URLAnalysisResponse } from '@/types/analysis';
@@ -108,7 +109,14 @@ export function AuditLog({ records, onSelect, onClear }: AuditLogProps) {
                   badge: 'bg-rose-950/60 text-rose-400 border-rose-800/50',
                   icon: ShieldX,
                 },
-              }[verdict];
+                INTERNAL_TARGET: {
+                  badge: 'bg-cyan-950/60 text-cyan-400 border-cyan-800/50',
+                  icon: Server,
+                },
+              }[verdict] || {
+                badge: 'bg-zinc-900 text-zinc-400 border-zinc-800',
+                icon: ShieldCheck,
+              };
 
               const VIcon = verdictStyle.icon;
 
