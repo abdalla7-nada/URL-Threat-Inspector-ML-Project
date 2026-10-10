@@ -16,6 +16,7 @@ export interface URLForensics {
   tld: string;
   is_allowlisted?: boolean;
   dangerous_protocol?: boolean;
+  is_shortener?: boolean;
 }
 
 export interface URLAnalysisResponse {

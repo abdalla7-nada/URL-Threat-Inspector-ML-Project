@@ -175,6 +175,12 @@ export default function Home() {
             gradient boosted decision tree ensemble. Enforces calibrated false positive
             rate policy (&le; 5%) for zero protocol-recording bias.
           </p>
+
+          <div className="mt-3 inline-flex items-center gap-2 text-xs font-mono text-zinc-500">
+            <span className="px-2.5 py-1 rounded border border-zinc-800/80 bg-zinc-900/60">
+              SCOPE: Deterministic Lexical &amp; Structural ML (Zero-Payload Static Analysis)
+            </span>
+          </div>
         </div>
 
         {/* Command Console Inspection Form */}

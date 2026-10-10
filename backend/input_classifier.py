@@ -60,6 +60,20 @@ LURE_WORDS = (
     "wallet",
 )
 
+# Canonical set of public URL redirection and shortening services
+KNOWN_SHORTENERS = frozenset({
+    "bit.ly",
+    "tinyurl.com",
+    "t.co",
+    "goo.gl",
+    "cutt.ly",
+    "is.gd",
+    "ow.ly",
+    "rb.gy",
+    "shorturl.at",
+    "bl.ink",
+})
+
 # Initialize offline TLD extractor instance
 _TLD_EXTRACTOR = tldextract.TLDExtract(
     suffix_list_urls=(),
@@ -181,6 +195,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
             "category": InputCategory.PLAIN_TEXT,
             "normalized_url": "",
             "message": "Input string is empty or whitespace-only.",
+            "is_shortener": False,
         }
 
     lower_input = raw_clean.lower()
@@ -195,6 +210,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                     f"High-risk executable or local resource URI scheme detected ('{ds}'). "
                     "Potential script injection or browser exploit vector."
                 ),
+                "is_shortener": False,
             }
 
     # 2. Plain-Text Detection: Spaces without standard web protocol
@@ -205,6 +221,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                 "category": InputCategory.PLAIN_TEXT,
                 "normalized_url": raw_clean,
                 "message": "Input contains whitespace characters without a resolvable web protocol.",
+                "is_shortener": False,
             }
         # If it has http:// or https://, check if hostname itself contains spaces
         try:
@@ -214,12 +231,14 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                     "category": InputCategory.PLAIN_TEXT,
                     "normalized_url": raw_clean,
                     "message": "Host segment contains spaces, violating RFC 3986 URL specification.",
+                    "is_shortener": False,
                 }
         except Exception:
             return {
                 "category": InputCategory.PLAIN_TEXT,
                 "normalized_url": raw_clean,
                 "message": "Input could not be parsed as a valid URI structure.",
+                "is_shortener": False,
             }
 
     # 3. Host and Path Parsing
@@ -261,6 +280,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                 f"Target resolves to internal or loopback host ('{host_lower}'). "
                 "Not a publicly routable internet domain."
             ),
+            "is_shortener": False,
         }
 
     if _is_ip_internal(host_lower):
@@ -279,6 +299,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                     f"Target resolves to private/loopback RFC1918 address ('{host_lower}'). "
                     "Not a publicly routable internet endpoint."
                 ),
+                "is_shortener": False,
             }
 
     # 5. Public Suffix (TLD) and Domain Integrity Verification
@@ -290,6 +311,7 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                 "Incomplete URL: Missing or invalid top-level domain suffix (e.g., .com, .org). "
                 "Please specify a complete domain target."
             ),
+            "is_shortener": False,
         }
 
     if host:
@@ -310,9 +332,26 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
                         "Incomplete URL: Missing or invalid top-level domain suffix (e.g., .com, .org). "
                         "Please specify a complete domain target."
                     ),
+                    "is_shortener": False,
                 }
 
-    # 6. Valid Web Target Normalization
+    # 6. URL Shortener Service Detection Heuristic
+    is_shortener = False
+    if host:
+        tld_info_shortener = _TLD_EXTRACTOR(host_lower)
+        reg_domain = (
+            f"{tld_info_shortener.domain}.{tld_info_shortener.suffix}".lower()
+            if tld_info_shortener.domain and tld_info_shortener.suffix
+            else host_lower
+        )
+        if (
+            host_lower in KNOWN_SHORTENERS
+            or reg_domain in KNOWN_SHORTENERS
+            or any(host_lower.endswith("." + s) for s in KNOWN_SHORTENERS)
+        ):
+            is_shortener = True
+
+    # 7. Valid Web Target Normalization
     if raw_clean.startswith("//"):
         normalized = "https:" + raw_clean
     elif not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", raw_clean):
@@ -327,4 +366,5 @@ def classify_input_string(raw_input: Optional[str]) -> Dict[str, Any]:
         "category": InputCategory.VALID_URL,
         "normalized_url": normalized,
         "message": "Well-formed web target ready for lexical forensic inspection.",
+        "is_shortener": is_shortener,
     }

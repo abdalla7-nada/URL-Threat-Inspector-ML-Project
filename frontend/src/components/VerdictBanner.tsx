@@ -156,6 +156,11 @@ export function VerdictBanner({ analysis }: VerdictBannerProps) {
                   CRITICAL: SCRIPT/URI INJECTION
                 </span>
               )}
+              {analysis.forensics?.is_shortener && (
+                <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase tracking-wider border border-amber-500/70 bg-amber-500/20 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)]">
+                  OBFUSCATED SHORTENER
+                </span>
+              )}
             </div>
             <p className="mt-1 text-sm text-zinc-300 max-w-2xl leading-relaxed">
               {analysis.risk_summary ||

@@ -41,6 +41,11 @@ export function Header({ onOpenSpecs, latency }: HeaderProps) {
 
         {/* System Telemetry & External Controls */}
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* Technical Scope Badge */}
+          <div className="hidden xl:flex items-center px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-800 text-xs font-mono text-zinc-500">
+            <span>SCOPE: Deterministic Lexical &amp; Structural ML (Zero-Payload Static Analysis)</span>
+          </div>
+
           {/* Policy Compliance Badge */}
           <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-800 text-xs font-mono text-zinc-300">
             <span className="relative flex h-2 w-2">

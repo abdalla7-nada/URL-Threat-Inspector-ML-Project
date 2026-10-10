@@ -185,6 +185,7 @@ class URLForensics(BaseModel):
     tld: str = Field(..., description="Registrable public suffix matched or categorized as 'other'.")
     is_allowlisted: bool = Field(default=False, description="Whether the root domain matches the enterprise reputation allowlist.")
     dangerous_protocol: bool = Field(default=False, description="Whether an executable or non-standard dangerous URI scheme was detected.")
+    is_shortener: Optional[bool] = Field(default=False, description="Whether the host is a known public URL shortening or redirection service.")
 
 
 class ErrorDetail(BaseModel):
@@ -266,6 +267,7 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
     classification = classify_input_string(raw_url)
     category = classification["category"]
     normalized_url = classification["normalized_url"]
+    is_shortener = bool(classification.get("is_shortener", False))
 
     if category == InputCategory.PLAIN_TEXT:
         msg = classification.get("message") or (
@@ -361,6 +363,7 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
             tld=str(raw_features["tld"]),
             is_allowlisted=True,
             dangerous_protocol=False,
+            is_shortener=False,
         )
         return URLAnalysisResponse(
             url=raw_url,
@@ -418,6 +421,14 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
         verdict = "BENIGN"
         risk_summary = "No adversarial lexical patterns or phishing signatures detected."
 
+    # Elevated caution policy for blind redirects / URL shortener services
+    if is_shortener:
+        risk_summary = "URL shortener service detected. Destination domain is obfuscated behind an HTTP redirect."
+        if verdict == "BENIGN":
+            verdict = "SUSPICIOUS"
+            is_threat = True
+            threat_probability = max(threat_probability, 0.52)
+
     elapsed_ms = round((time.perf_counter() - start_time) * 1000, 2)
 
     forensics = URLForensics(
@@ -433,6 +444,7 @@ def analyze_single_url(raw_url: str) -> URLAnalysisResponse:
         tld=str(raw_features["tld"]),
         is_allowlisted=False,
         dangerous_protocol=False,
+        is_shortener=is_shortener,
     )
 
     return URLAnalysisResponse(
