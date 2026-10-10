@@ -62,7 +62,7 @@ export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
             onChange={(e) => setInputUrl(e.target.value)}
             disabled={isLoading}
             placeholder="Enter URL to inspect (e.g. https://auth-verify.account-update.xyz/login)"
-            className="w-full py-4 pr-36 bg-transparent text-sm sm:text-base font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
+            className="w-full py-4 pr-44 sm:pr-48 bg-transparent text-sm sm:text-base font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none"
             spellCheck={false}
             autoComplete="off"
           />
@@ -81,17 +81,17 @@ export function InspectionForm({ onInspect, isLoading }: InspectionFormProps) {
             <button
               type="submit"
               disabled={isLoading || !inputUrl.trim()}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 transition-all font-mono shadow-md disabled:shadow-none"
+              className="flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 transition-all font-mono shadow-md disabled:shadow-none"
             >
               {isLoading ? (
                 <>
                   <Activity className="w-4 h-4 animate-spin text-zinc-950" />
-                  <span>Inspecting...</span>
+                  <span>Analyzing...</span>
                 </>
               ) : (
                 <>
                   <Terminal className="w-4 h-4" />
-                  <span>Inspect</span>
+                  <span>Analyze URL</span>
                 </>
               )}
             </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
   Terminal,
@@ -15,6 +15,12 @@ interface HeaderProps {
 }
 
 export function Header({ onOpenSpecs, latency }: HeaderProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <header className="w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -50,7 +56,7 @@ export function Header({ onOpenSpecs, latency }: HeaderProps) {
           </div>
 
           {/* Real-time Latency Telemetry */}
-          {latency !== null && latency !== undefined && (
+          {isMounted && latency !== null && latency !== undefined && (
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-900/90 border border-zinc-800 text-xs font-mono text-zinc-400">
               <Activity className="w-3.5 h-3.5 text-emerald-400" />
               <span>{latency.toFixed(1)}ms</span>

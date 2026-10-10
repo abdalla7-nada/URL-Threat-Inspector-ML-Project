@@ -32,9 +32,11 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Load persisted audit records from localStorage if present
   useEffect(() => {
+    setIsMounted(true);
     try {
       const stored = localStorage.getItem('cybersec_audit_records');
       if (stored) {

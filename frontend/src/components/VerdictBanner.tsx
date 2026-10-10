@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
   ShieldAlert,
@@ -18,9 +18,29 @@ interface VerdictBannerProps {
 }
 
 export function VerdictBanner({ analysis }: VerdictBannerProps) {
+  const [isMounted, setIsMounted] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { verdict, is_threat, threat_probability, threshold_applied, latency_ms, url } =
     analysis;
+
+  if (!isMounted) {
+    return (
+      <div className="w-full rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-6 sm:p-8 backdrop-blur-xl animate-pulse">
+        <div className="flex items-center gap-4 pb-6 border-b border-zinc-800/70">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-zinc-800/60 shrink-0" />
+          <div className="space-y-2 flex-1">
+            <div className="h-6 w-48 bg-zinc-800/60 rounded" />
+            <div className="h-4 w-96 max-w-full bg-zinc-800/40 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const scorePct = Math.min(Math.max(threat_probability * 100, 0), 100);
   const thresholdPct = threshold_applied * 100;

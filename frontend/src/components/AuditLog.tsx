@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Clock,
   ExternalLink,
@@ -24,6 +24,12 @@ interface AuditLogProps {
 }
 
 export function AuditLog({ records, onSelect, onClear }: AuditLogProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const handleExportJson = () => {
     if (records.length === 0) return;
     const blob = new Blob([JSON.stringify(records, null, 2)], {
@@ -37,7 +43,7 @@ export function AuditLog({ records, onSelect, onClear }: AuditLogProps) {
     URL.revokeObjectURL(url);
   };
 
-  if (records.length === 0) {
+  if (!isMounted || records.length === 0) {
     return null;
   }
 
