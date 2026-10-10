@@ -15,8 +15,9 @@ import time
 from typing import Any, Dict, List, Optional
 import urllib.parse
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import joblib
 import pandas as pd
 from pydantic import BaseModel, Field
@@ -475,6 +476,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def verify_internal_api_secret(request: Request, call_next):
+    """
+    Guards inspection endpoints against unauthenticated direct scraping if INTERNAL_API_SECRET is configured.
+    Health probe (/health) and API metadata (/) remain publicly accessible for monitoring.
+    """
+    secret = os.environ.get("INTERNAL_API_SECRET")
+    if secret:
+        path = request.url.path.rstrip("/")
+        if path in ("/analyze", "/api/analyze", "/api/py/analyze", "/batch/analyze", "/api/batch/analyze"):
+            is_prod = bool(
+                os.environ.get("VERCEL")
+                or os.environ.get("ENVIRONMENT", "").lower() == "production"
+                or os.environ.get("NODE_ENV", "").lower() == "production"
+            )
+            client_secret = request.headers.get("x-internal-secret") or request.headers.get("X-Internal-Secret")
+            if is_prod and client_secret != secret:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "Forbidden: Invalid or missing internal gateway secret."},
+                )
+            elif client_secret is not None and client_secret != secret:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "Forbidden: Invalid or missing internal gateway secret."},
+                )
+
+    return await call_next(request)
+
 
 
 # -----------------------------------------------------------------------------

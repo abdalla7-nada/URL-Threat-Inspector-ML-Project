@@ -5,12 +5,14 @@ const BACKEND_BASE_URL = (
   'https://url-threat-inspector-ml-project.vercel.app'
 ).replace(/\/$/, '');
 
+const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET || 'soc-secure-key-prod';
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Executes fetch with a 1-retry fallback for cold-start connection drops or gateway timeouts.
+ * Executes fetch with a 1-retry fallback for network drops or HTTP >= 500 cold-start timeouts.
  */
-async function fetchWithColdStartRetry(
+async function fetchWithRetry(
   url: string,
   options: RequestInit,
   retries = 1,
@@ -18,8 +20,7 @@ async function fetchWithColdStartRetry(
 ): Promise<Response> {
   try {
     const response = await fetch(url, options);
-    // If the serverless instance encounters a transient 502/503/504 gateway timeout during cold start
-    if (!response.ok && [500, 502, 503, 504].includes(response.status) && retries > 0) {
+    if (!response.ok && response.status >= 500 && retries > 0) {
       await delay(delayMs);
       return fetch(url, options);
     }
@@ -34,7 +35,10 @@ async function fetchWithColdStartRetry(
 }
 
 /**
- * Safely parses response body, ensuring non-JSON or HTML 500/504 errors do not crash JSON parsing.
+ * Safely parses response body:
+ * - If JSON, parses via response.json().
+ * - If HTML / non-JSON (e.g. Vercel 504/500 gateway page), safely reads response.text()
+ *   and returns a clean 503 cold-start status without throwing SyntaxError.
  */
 async function parseResponseBody(response: Response): Promise<{ data: unknown; status: number }> {
   const contentType = response.headers.get('content-type') || '';
@@ -43,24 +47,23 @@ async function parseResponseBody(response: Response): Promise<{ data: unknown; s
       const json = await response.json();
       return { data: json, status: response.status };
     } catch {
-      const rawText = await response.text();
+      await response.text().catch(() => '');
       return {
         data: {
-          detail: rawText || 'Malformed JSON received from inspection engine.',
+          detail: 'The inspection backend is initializing (cold start). Please retry in a moment.',
         },
-        status: response.status,
+        status: 503,
       };
     }
   }
 
-  const rawText = await response.text();
+  // Non-JSON or HTML gateway timeout page
+  await response.text().catch(() => '');
   return {
     data: {
-      detail:
-        rawText ||
-        `Inspection engine returned non-JSON response (HTTP ${response.status}).`,
+      detail: 'The inspection backend is initializing (cold start). Please retry in a moment.',
     },
-    status: response.status,
+    status: 503,
   };
 }
 
@@ -69,10 +72,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const targetUrl = `${BACKEND_BASE_URL}/analyze`;
 
-    const response = await fetchWithColdStartRetry(targetUrl, {
+    const response = await fetchWithRetry(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Internal-Secret': INTERNAL_API_SECRET,
       },
       body: JSON.stringify(body),
     });
@@ -93,9 +97,12 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     const targetUrl = `${BACKEND_BASE_URL}/health`;
-    const response = await fetchWithColdStartRetry(targetUrl, {
+    const response = await fetchWithRetry(targetUrl, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Secret': INTERNAL_API_SECRET,
+      },
     });
 
     const { data, status } = await parseResponseBody(response);
