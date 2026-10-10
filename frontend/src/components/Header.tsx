@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck,
-  Terminal,
   Activity,
   Server,
-  ExternalLink,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -33,9 +31,6 @@ export function Header({ onOpenSpecs, latency }: HeaderProps) {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-zinc-100 tracking-wider text-sm sm:text-base font-mono">
                 CYBERSEC URL INSPECTOR
-              </span>
-              <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
-                PROD v1.0
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 font-mono hidden sm:block">
@@ -74,18 +69,6 @@ export function Header({ onOpenSpecs, latency }: HeaderProps) {
               <span className="hidden sm:inline">Engine Specs</span>
             </button>
           )}
-
-          {/* Direct API Documentation Link */}
-          <a
-            href="http://localhost:8000/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 hover:border-zinc-700 transition-colors"
-          >
-            <Terminal className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden sm:inline">API Docs</span>
-            <ExternalLink className="w-3 h-3 text-zinc-500" />
-          </a>
         </div>
       </div>
     </header>
